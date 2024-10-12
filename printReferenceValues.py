@@ -6,10 +6,10 @@ from util import parseInputs, printUsage, validateRobot, initializeValues, print
 import numpy as np
 
 def main():
-    URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME = parseInputs()
+    URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME, FLOATING_BASE = parseInputs()
 
     parser = URDFParser()
-    robot = parser.parse(URDF_PATH)
+    robot = parser.parse(URDF_PATH, floating_base=FLOATING_BASE)
 
     validateRobot(robot)
 

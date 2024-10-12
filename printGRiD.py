@@ -8,9 +8,9 @@ import sys
 def main():
     inputs = parseInputs(NO_ARG_OPTION = True)
     if not inputs is None:
-        URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME  = inputs
+        URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME, FLOATING_BASE = parseInputs()
         parser = URDFParser()
-        robot = parser.parse(URDF_PATH)
+        robot = parser.parse(URDF_PATH, floating_base=FLOATING_BASE)
 
         validateRobot(robot, NO_ARG_OPTION = True)
 

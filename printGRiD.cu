@@ -22,11 +22,22 @@ void test(){
 	grid::gridData<T> *hd_data = grid::init_gridData<T,1>();
 	
 	// load q,qd,u
+	// for(int j = 0; j < grid::NUM_JOINTS; j++){
+	// 	hd_data->h_q_qd_u[j] = getRand<double>(); 
+	// 	hd_data->h_q_qd_u[j+grid::NUM_JOINTS] = getRand<double>(); 
+	// 	hd_data->h_q_qd_u[j+2*grid::NUM_JOINTS] = getRand<double>();
+	// }
+	T q[NUM_DOF+FLOATING_BASE] = {-0.336899, 1.29662, -0.677475, -1.42182, -0.706676, -0.134981, -1.14953};
+	T qd[NUM_DOF] = {0.43302, -0.421561, -0.645439, -1.86055, -0.0130938, -0.458284, 0.741174};
+	T u[NUM_DOF] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 	for(int j = 0; j < grid::NUM_JOINTS; j++){
-		hd_data->h_q_qd_u[j] = getRand<double>(); 
-		hd_data->h_q_qd_u[j+grid::NUM_JOINTS] = getRand<double>(); 
-		hd_data->h_q_qd_u[j+2*grid::NUM_JOINTS] = getRand<double>();
+		hd_data->h_q_qd_u[j] = q[j]; 
+		hd_data->h_q_qd_u[j+grid::NUM_JOINTS] = qd[j]; 
+		hd_data->h_q_qd_u[j+2*grid::NUM_JOINTS] = u[j];
 	}
+
+
+
 	gpuErrchk(cudaMemcpy(hd_data->d_q_qd_u,hd_data->h_q_qd_u,3*grid::NUM_JOINTS*sizeof(T),cudaMemcpyHostToDevice));
 	gpuErrchk(cudaDeviceSynchronize());
 
