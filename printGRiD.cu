@@ -21,20 +21,11 @@ void test(){
 	grid::robotModel<T> *d_robotModel = grid::init_robotModel<T>();
 	grid::gridData<T> *hd_data = grid::init_gridData<T,1>();
 	
-	// load q,qd,u
-	// for(int j = 0; j < grid::NUM_JOINTS; j++){
-	// 	hd_data->h_q_qd_u[j] = getRand<double>(); 
-	// 	hd_data->h_q_qd_u[j+grid::NUM_JOINTS] = getRand<double>(); 
-	// 	hd_data->h_q_qd_u[j+2*grid::NUM_JOINTS] = getRand<double>();
-	// }
-	T q[NUM_DOF+FLOATING_BASE] = {-0.336899, 1.29662, -0.677475, -1.42182, -0.706676, -0.134981, -1.14953};
-	T qd[NUM_DOF] = {0.43302, -0.421561, -0.645439, -1.86055, -0.0130938, -0.458284, 0.741174};
-	T u[NUM_DOF] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-	for(int j = 0; j < grid::NUM_JOINTS; j++){
-		hd_data->h_q_qd_u[j] = q[j]; 
-		hd_data->h_q_qd_u[j+grid::NUM_JOINTS] = qd[j]; 
-		hd_data->h_q_qd_u[j+2*grid::NUM_JOINTS] = u[j];
-	}
+
+	for (int j = 0; j < grid::NUM_JOINTS; j++) hd_data->h_q_qd_u[j] = getRand<double>();
+	for (int j = 0; j < grid::NUM_VEL; j++) hd_data->h_q_qd_u[j+grid::NUM_JOINTS] = getRand<double>();
+	for (int j = 0; j < grid::NUM_VEL; j++) hd_data->h_q_qd_u[j+grid::NUM_JOINTS+grid::NUM_VEL] = static_cast<T>(0);
+
 
 
 
@@ -43,40 +34,50 @@ void test(){
 
 	printf("q,qd,u\n");
 	printMat<T,1,grid::NUM_JOINTS>(hd_data->h_q_qd_u,1);
-	printMat<T,1,grid::NUM_JOINTS>(&hd_data->h_q_qd_u[grid::NUM_JOINTS],1);
-	printMat<T,1,grid::NUM_JOINTS>(&hd_data->h_q_qd_u[2*grid::NUM_JOINTS],1);
-
-	printf("eePos\n");
-	grid::end_effector_positions<T,false>(hd_data,d_robotModel,1,dim3(1,1,1),dimms,streams);
-	printMat<T,1,6*grid::NUM_EES>(hd_data->h_eePos,1);
-
-	printf("deePos\n");
-	grid::end_effector_positions_gradient<T,false>(hd_data,d_robotModel,1,dim3(1,1,1),dimms,streams);
-	printMat<T,6,grid::NUM_EES*grid::NUM_JOINTS>(hd_data->h_deePos,6);
+	
+	printMat<T,1,grid::NUM_VEL>(&hd_data->h_q_qd_u[grid::NUM_JOINTS],1);
+	printMat<T,1,grid::NUM_VEL>(&hd_data->h_q_qd_u[grid::NUM_JOINTS+grid::NUM_VEL],1);
 
 	printf("c\n");
 	grid::inverse_dynamics<T,false,false>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
-	printMat<T,1,grid::NUM_JOINTS>(hd_data->h_c,1);
+	printMat<T,1,grid::NUM_VEL>(hd_data->h_c,1);
 
 	printf("Minv\n");
 	grid::direct_minv<T,false>(hd_data,d_robotModel,1,dim3(1,1,1),dimms,streams);
-	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(hd_data->h_Minv,grid::NUM_JOINTS);
+	printMat<T,grid::NUM_VEL,grid::NUM_VEL>(hd_data->h_Minv,grid::NUM_VEL);
 
 	printf("qdd\n");
 	grid::forward_dynamics<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
-	printMat<T,1,grid::NUM_JOINTS>(hd_data->h_qdd,1);
+	printMat<T,1,grid::NUM_VEL>(hd_data->h_qdd,1);
 
 	grid::inverse_dynamics_gradient<T,true,false>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
 	printf("dc_dq\n");
-	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(hd_data->h_dc_du,grid::NUM_JOINTS);
+	printMat<T,grid::NUM_VEL,grid::NUM_VEL>(hd_data->h_dc_du,grid::NUM_VEL);
 	printf("dc_dqd\n");
-	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_dc_du[grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
+	printMat<T,grid::NUM_VEL,grid::NUM_VEL>(&hd_data->h_dc_du[grid::NUM_VEL*grid::NUM_VEL],grid::NUM_VEL);
 
 	grid::forward_dynamics_gradient<T,false>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
 	printf("df_dq\n");
-	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(hd_data->h_df_du,grid::NUM_JOINTS);
+	printMat<T,grid::NUM_VEL,grid::NUM_VEL>(hd_data->h_df_du,grid::NUM_VEL);
 	printf("df_dqd\n");
-	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_df_du[grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
+	printMat<T,grid::NUM_VEL,grid::NUM_VEL>(&hd_data->h_df_du[grid::NUM_VEL*grid::NUM_VEL],grid::NUM_VEL);
+
+		// printf("eePos\n");
+		// grid::end_effector_positions<T,false>(hd_data,d_robotModel,1,dim3(1,1,1),dimms,streams);
+		// printMat<T,1,6*grid::NUM_EES>(hd_data->h_eePos,1);
+
+		// printf("deePos\n");
+		// grid::end_effector_positions_gradient<T,false>(hd_data,d_robotModel,1,dim3(1,1,1),dimms,streams);
+		// printMat<T,6,grid::NUM_EES*grid::NUM_JOINTS>(hd_data->h_deePos,6);
+
+
+		// grid::aba<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
+		// printf("aba\n");
+		// printMat<T,1,grid::NUM_JOINTS>(hd_data->h_qdd,1);
+
+		// grid::crba<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
+		// printf("crba\n");
+		// printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(hd_data->h_M,grid::NUM_JOINTS);
 
 	grid::close_grid<T>(streams,d_robotModel,hd_data);
 }

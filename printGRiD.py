@@ -18,7 +18,9 @@ def main():
         print("-----------------")
         print("Generating GRiD.cuh")
         print("-----------------")
-        codegen.gen_all_code(include_homogenous_transforms = True)
+        if FLOATING_BASE: include_homogenous_transforms = False
+        else: include_homogenous_transforms = True
+        codegen.gen_all_code(include_homogenous_transforms = include_homogenous_transforms)
         print("New code generated and saved to grid.cuh!")
 
     print("-----------------")
@@ -26,15 +28,14 @@ def main():
     print("-----------------")
     result = subprocess.run( \
         ["nvcc", "-std=c++11", "-o", "printGRiD.exe", "printGRiD.cu", \
-         "-gencode", "arch=compute_86,code=sm_86", \
-         "-O3", "-ftz=true", "-prec-div=false", "-prec-sqrt=false"], \
+         "-gencode", "arch=compute_86,code=sm_86"], \
         capture_output=True, text=True \
     )
     if result.stderr:
         print("Compilation errors follow:")
         print(result.stderr)
         exit()
-
+    
     print("-----------------")
     print("Running printGRiD")
     print("-----------------")

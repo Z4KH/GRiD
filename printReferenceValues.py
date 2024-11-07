@@ -16,15 +16,18 @@ def main():
     reference = RBDReference(robot)
     q, qd, u, n = initializeValues(robot, MATCH_CPP_RANDOM = True)
 
+    for (idx, _) in enumerate(u): u[idx] = 0
+
     print("q\n",q)
     print("qd\n",qd)
     print("u\n",u)
 
-    ee_pos = reference.end_effector_positions(q)
-    print("eepos\n",ee_pos)
+    if not FLOATING_BASE:
+        ee_pos = reference.end_effector_positions(q)
+        print("eepos\n",ee_pos)
 
-    dee_pos = reference.end_effector_position_gradients(q)
-    print("deepos\n",dee_pos)
+        dee_pos = reference.end_effector_position_gradients(q)
+        print("deepos\n",dee_pos)
 
     (c, v, a, f) = reference.rnea(q,qd)
     print("c\n",c)
@@ -35,19 +38,22 @@ def main():
     qdd = np.matmul(Minv,(u-c))
     print("qdd\n",qdd)
 
-    crba=reference.crba(q,qd,u)
+    crba=reference.crba(q,qd)
     print("crba\n",crba)
 
-    qdd_aba = reference.aba(q,qd,u)
-    print("aba\n",qdd_aba)
-    
+    # qdd_aba = reference.aba(q,qd,u)
+    # print("aba\n",qdd_aba)
+
     dc_du = reference.rnea_grad(q, qd, qdd)
-    print("dc/dq with qdd\n",dc_du[:,:n])
-    print("dc/dqd with qdd\n",dc_du[:,n:])
+    print("dc/dq with qdd\n",dc_du)
+    print("dc/dqd with qdd\n",dc_du)
 
     df_du = np.matmul(-Minv,dc_du)
-    print("df/dq\n",df_du[:,:n])
-    print("df/dqd\n",df_du[:,n:])
+    print("df/dq\n",df_du)
+    print("df/dqd\n",df_du)
+
+    crba = reference.crba(q,qd)
+    print(f"crba:\n{crba}")
 
     if DEBUG_MODE:
         print("-------------------")
