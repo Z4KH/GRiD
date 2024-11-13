@@ -72,6 +72,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
     r = RBDReference(robot)
     passed_all = True
 
+
     # inverse dynamics gradient
     (dcdq_ref, dcdqd_ref) = r.rnea_grad(q,qd,np.zeros(nv))
     dcdq_grid = grid_output[:nv]
@@ -83,6 +84,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
     passed, differences, equal, sum_diff = compare_matrix(dcdqd_ref, dcdqd_grid)
     print(f'dc_dqd: {equal}\n')
     if 'Failed' in equal: passed_all = False
+
 
     # minv
     minv_ref = np.array(r.minv(q))
@@ -124,6 +126,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
     print(f'df_dqd: {equal}\n')
     if 'Failed' in equal: passed_all = False
 
+
     if not FLOATING_BASE:
         # eepos
         eepos_ref = r.end_effector_positions(q)
@@ -150,13 +153,15 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
         print(f'aba: {equal}\n')
         if 'Failed' in equal: passed_all = False
 
-        # crba - not finished
-        # crba_ref = np.array(r.crba(q,qd))
-        # crba_grid = grid_output[:nv]
-        # grid_output = grid_output[nv:]
-        # passed, differences, equal, sum_diff = compare_matrix(crba_ref,crba_grid)
-        # print(f'crba: {equal}\n')
-        # if 'Failed' in equal: passed_all = False
+        # crba
+        crba_ref = np.array(r.crba(q,np.zeros(len(qd))))
+        crba_grid = grid_output[:nv]
+        grid_output = grid_output[nv:]
+        passed, differences, equal, sum_diff = compare_matrix(crba_ref,crba_grid)
+        print(f'crba: {equal}\n')
+        if 'Failed' in equal: passed_all = False
+
+
         return passed_all
 
 

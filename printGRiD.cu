@@ -38,6 +38,11 @@ void test(){
 	printMat<T,1,grid::NUM_VEL>(&hd_data->h_q_qd_u[grid::NUM_JOINTS],1);
 	printMat<T,1,grid::NUM_VEL>(&hd_data->h_q_qd_u[grid::NUM_JOINTS+grid::NUM_VEL],1);
 
+	grid::crba<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
+	printf("crba\n");
+	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(hd_data->h_M,grid::NUM_JOINTS);
+
+
 	printf("c\n");
 	grid::inverse_dynamics<T,false,false>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
 	printMat<T,1,grid::NUM_VEL>(hd_data->h_c,1);
@@ -74,10 +79,6 @@ void test(){
 		// grid::aba<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
 		// printf("aba\n");
 		// printMat<T,1,grid::NUM_JOINTS>(hd_data->h_qdd,1);
-
-		// grid::crba<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
-		// printf("crba\n");
-		// printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(hd_data->h_M,grid::NUM_JOINTS);
 
 	grid::close_grid<T>(streams,d_robotModel,hd_data);
 }

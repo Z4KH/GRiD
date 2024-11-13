@@ -52,8 +52,9 @@ def main():
     print("df/dq\n",df_du)
     print("df/dqd\n",df_du)
 
-    crba = reference.crba(q,qd)
+    crba = reference.crba(q,np.zeros(len(qd)))
     print(f"crba:\n{crba}")
+
 
     if DEBUG_MODE:
         print("-------------------")
