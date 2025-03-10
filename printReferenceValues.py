@@ -6,26 +6,30 @@ from util import parseInputs, printUsage, validateRobot, initializeValues, print
 import numpy as np
 
 def main():
-    URDF_PATH, DEBUG_MODE, FLOATING_BASE, FILE_NAMESPACE_NAME = parseInputs()
+    URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME, FLOATING_BASE = parseInputs()
 
     parser = URDFParser()
-    robot = parser.parse(URDF_PATH, floating_base = FLOATING_BASE)
+    robot = parser.parse(URDF_PATH, floating_base=FLOATING_BASE)
 
     validateRobot(robot)
 
     reference = RBDReference(robot)
     q, qd, u, n = initializeValues(robot, MATCH_CPP_RANDOM = True)
-    
+
+    for (idx, _) in enumerate(u): u[idx] = 0
+
     print("q\n",q)
     print("qd\n",qd)
     print("u\n",u)
 
-    ee_pos = reference.end_effector_positions(q)
-    print("eepos\n",ee_pos)
+    if not FLOATING_BASE:
+        ee_pos = reference.end_effector_positions(q)
+        print("eepos\n",ee_pos)
 
-    dee_pos = reference.end_effector_position_gradients(q)
-    print("deepos\n",dee_pos)
+        dee_pos = reference.end_effector_position_gradients(q)
+        print("deepos\n",dee_pos)
 
+    
     (c, v, a, f) = reference.rnea(q,qd)
     print("c\n",c)
 
@@ -35,39 +39,29 @@ def main():
     qdd = np.matmul(Minv,(u-c))
     print("qdd\n",qdd)
 
-    crba=reference.crba(q,qd,u)
+    crba=reference.crba(q,qd)
     print("crba\n",crba)
 
-    qdd_aba = reference.aba(q,qd,u)
-    print("aba\n",qdd_aba)
+    # qdd_aba = reference.aba(q,qd,u)
+    # print("aba\n",qdd_aba)
 
-    # NOTE qdd above does not match qdd below... why is that? Check same calculation in matlab of Minv @ (u-c)
-    print("dc_dq") 
-    # qdd = np.array([0.741788, 1.92844, -0.903882, 0.0333959, 1.17986, -1.94599, 0.32869, -0.139457, 2.00667, -0.519292, -0.711198, 0.376638, -0.209225])
-    qdd = u
-    dc_dq, dc_dqd = reference.rnea_grad(q, qd, qdd)
-    print(dc_dq)
-    print("dc_dqd")
-    print(dc_dqd)
+    dc_du = reference.rnea_grad(q, qd, qdd)
+    print("dc/dq with qdd\n",dc_du)
+    print("dc/dqd with qdd\n",dc_du)
 
-    dqdd_dq, dqdd_dqd, dqdd_dc = reference.forward_dynamics_grad(q,qd,c)
-    print("dqdd_dq")
-    print(dqdd_dq)
-    print("dqdd_dqd")
-    print(dqdd_dqd)
-    print("dqdd_dc")
-    print(dqdd_dc)
+    df_du = np.matmul(-Minv,dc_du)
+    print("df/dq\n",df_du)
+    print("df/dqd\n",df_du)
 
-    # forward dynamics
-    df_dq = np.matmul(-Minv,dc_dq)
-    df_dqd = np.matmul(-Minv,dc_dqd)
-    print(f"df/dq {df_dq.shape}")
-    print(df_dq)
-    print("df/dqd")
-    print(df_dqd)
+    crba = reference.crba(q,np.zeros(len(qd)))
+    print(f"crba:\n{crba}")
 
-    external_forces = np.zeros((6,NB))
-    qdd = reference.aba(q,qd,c, f_ext = [])
+
+    d2tau_dq, d2tau_dqd, d2tau_cross, dM_dq = reference.second_order_idsva_parallel(q,qd,np.zeros(len(qd)))
+    print(f'\nd2tau_dq:\n{d2tau_dq}')
+    print(f'\nd2tau_dqd:\n{d2tau_dqd}')
+    print(f'\nd2tau_cross:\n{d2tau_cross}')
+    print(f'\ndM_dq:\n{dM_dq}')
 
 
     if DEBUG_MODE:
