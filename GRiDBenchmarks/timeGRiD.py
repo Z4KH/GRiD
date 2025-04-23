@@ -1,9 +1,14 @@
 #!/usr/bin/python3
+import sys
+import os
+import subprocess
+
+# Add parent directory to path if running from GRiDBenchmarks
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import util as util
 import URDFParser.URDFParser as URDFParser
 import GRiDCodeGenerator.GRiDCodeGenerator as GRiDCodeGenerator
-import subprocess
-import sys
 
 
 def main():
