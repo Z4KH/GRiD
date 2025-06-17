@@ -115,7 +115,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
 
 
     # forward dynamics gradient
-    (dfdq_ref, dfdqd_ref) = r.forward_dynamics_grad(q,qd,fd_ref)
+    (dfdq_ref, dfdqd_ref) = r.forward_dynamics_grad(q,qd,np.zeros_like(fd_ref))
     dfdq_grid = grid_output[:nv]
     dfdqd_grid = grid_output[nv:2*nv]
     grid_output = grid_output[2*nv:]
