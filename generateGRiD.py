@@ -79,7 +79,6 @@ def generate_matlab_model(robot, floating_base):
 
 def main():
     URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME, FLOATING_BASE = parseInputs()
-
     parser = URDFParser()
     robot = parser.parse(URDF_PATH, floating_base=FLOATING_BASE)
 

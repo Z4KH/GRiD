@@ -8,7 +8,7 @@ import sys
 def main():
     inputs = parseInputs(NO_ARG_OPTION = True)
     if not inputs is None:
-        URDF_PATH, DEBUG_MODE, FLOATING_BASE, FILE_NAMESPACE_NAME = inputs
+	URDF_PATH, DEBUG_MODE, FILE_NAMESPACE_NAME, FLOATING_BASE = inputs
         parser = URDFParser()
         robot = parser.parse(URDF_PATH, floating_base = FLOATING_BASE)
 
