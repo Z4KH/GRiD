@@ -74,7 +74,8 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
 
 
     # inverse dynamics gradient
-    (dcdq_ref, dcdqd_ref) = r.rnea_grad(q,qd,np.zeros(nv))
+    dcdu_ref = r.rnea_grad(q,qd,np.zeros(nv))
+    dcdq_ref, dcdqd_ref = np.hsplit(dcdu_ref, [len(q)])
     dcdq_grid = grid_output[:nv]
     dcdqd_grid = grid_output[nv:2*nv]
     grid_output = grid_output[2*nv:]
@@ -129,7 +130,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
 
     if not FLOATING_BASE:
         # eepos
-        eepos_ref = r.end_effector_positions(q)
+        eepos_ref = r.end_effector_pose(q)
         for i in range(len(eepos_ref)): eepos_ref[i] = eepos_ref[i].flatten()
         eepos_ref = np.concatenate(eepos_ref).flatten().tolist()[0]
         eepos_grid = grid_output[0].strip().split(' ')
@@ -139,7 +140,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
         if 'Failed' in equal: passed_all = False
 
         # eepos grad
-        eeposgrad_ref = np.array(r.end_effector_position_gradients(q))[0]
+        eeposgrad_ref = np.array(r.end_effector_pose_gradient(q))[0]
         eeposgrad_grid = grid_output[1:7]
         grid_output = grid_output[7:]
         passed, differences, equal, sum_diff = compare_matrix(eeposgrad_ref, eeposgrad_grid)
@@ -154,7 +155,7 @@ def testGRiD(URDF_PATH, FLOATING_BASE):
         if 'Failed' in equal: passed_all = False
 
         # crba
-        crba_ref = np.array(r.crba(q,np.zeros(len(qd))))
+        crba_ref = np.array(r.crba(q))
         crba_grid = grid_output[:nv]
         grid_output = grid_output[nv:]
         passed, differences, equal, sum_diff = compare_matrix(crba_ref,crba_grid)
