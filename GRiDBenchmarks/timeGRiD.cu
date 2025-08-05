@@ -52,15 +52,19 @@ void test(int NUM_TIMESTEPS, cudaStream_t *streams, grid::robotModel<T> *d_robot
 		if(NUM_TIMESTEPS == 1){
 			// first one is done twice to wake up the GPU and get it up to full speed
 			grid::inverse_dynamics_single_timing<T,false,true>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
-    		grid::inverse_dynamics_single_timing<T,false,true>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
-
+			cudaDeviceSynchronize();
     		grid::direct_minv_single_timing<T,true>(hd_data,d_robotModel,TEST_ITERS,dim3(1,1,1),dimms,streams);
-
-    		// grid::forward_dynamics_single_timing<T>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
-
+			cudaDeviceSynchronize();
+    		grid::forward_dynamics_single_timing<T>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
+			cudaDeviceSynchronize();
     		grid::inverse_dynamics_gradient_single_timing<T,false,true>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
-
-    		// grid::forward_dynamics_gradient_single_timing<T,false>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
+			cudaDeviceSynchronize();
+    		grid::forward_dynamics_gradient_single_timing<T,false>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
+			cudaDeviceSynchronize();
+			grid::idsva_so_host_single_timing<T>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
+			cudaDeviceSynchronize();
+			grid::fdsva_so_single_timing<T>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
+			cudaDeviceSynchronize();
 		}
 		else{
 			for(int iter = 0; iter < TEST_ITERS; iter++){
@@ -153,7 +157,7 @@ void test(int NUM_TIMESTEPS, cudaStream_t *streams, grid::robotModel<T> *d_robot
 
 			for(int iter = 0; iter < TEST_ITERS; iter++){
 				clock_gettime(CLOCK_MONOTONIC,&start);
-				grid::idsva_so_host<T>(hd_data,d_robotModel,GRAVITY,NUM_TIMESTEPS,dim3(NUM_TIMESTEPS,1,1),dimms,streams);
+				grid::idsva_so_host_compute_only<T>(hd_data,d_robotModel,GRAVITY,NUM_TIMESTEPS,dim3(NUM_TIMESTEPS,1,1),dimms);
 				clock_gettime(CLOCK_MONOTONIC,&end);
 				times.push_back(time_delta_us_timespec(start,end));
 			}
@@ -169,7 +173,7 @@ void test(int NUM_TIMESTEPS, cudaStream_t *streams, grid::robotModel<T> *d_robot
 
 			for(int iter = 0; iter < TEST_ITERS; iter++){
 				clock_gettime(CLOCK_MONOTONIC,&start);
-				grid::fdsva_so<T>(hd_data,d_robotModel,GRAVITY,NUM_TIMESTEPS,dim3(NUM_TIMESTEPS,1,1),dimms,streams);
+				grid::fdsva_so_compute_only<T>(hd_data,d_robotModel,GRAVITY,NUM_TIMESTEPS,dim3(NUM_TIMESTEPS,1,1),dimms);
 				clock_gettime(CLOCK_MONOTONIC,&end);
 				times.push_back(time_delta_us_timespec(start,end));
 			}
