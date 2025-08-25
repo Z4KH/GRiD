@@ -53,6 +53,8 @@ void test(int NUM_TIMESTEPS, cudaStream_t *streams, grid::robotModel<T> *d_robot
 			// first one is done twice to wake up the GPU and get it up to full speed
 			grid::inverse_dynamics_single_timing<T,false,true>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
 			cudaDeviceSynchronize();
+			grid::inverse_dynamics_single_timing<T,false,true>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
+			cudaDeviceSynchronize();
     		grid::direct_minv_single_timing<T,true>(hd_data,d_robotModel,TEST_ITERS,dim3(1,1,1),dimms,streams);
 			cudaDeviceSynchronize();
     		grid::forward_dynamics_single_timing<T>(hd_data,d_robotModel,GRAVITY,TEST_ITERS,dim3(1,1,1),dimms,streams);
