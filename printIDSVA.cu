@@ -1,3 +1,6 @@
+// nvcc -gencode arch=compute_89,code=sm_89 -o printIDSVA printIDSVA.cu
+
+
 #include <random>
 #include <algorithm>
 #include "grid.cuh"
@@ -48,34 +51,36 @@ void test(){
 	gpuErrchk(cudaMemcpy(hd_data->d_q_qd_u,hd_data->h_q_qd_u,3*grid::NUM_JOINTS*sizeof(T),cudaMemcpyHostToDevice));
 	gpuErrchk(cudaDeviceSynchronize());
 
-
+	grid::inverse_dynamics_single_timing<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
+	grid::inverse_dynamics_single_timing<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
+	grid::inverse_dynamics_gradient_single_timing<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
 	grid::idsva_so_host_single_timing<T>(hd_data,d_robotModel,gravity,1,dim3(1,1,1),dimms,streams);
 	
 	// // Print Results
-	// printf("d2tau_dq2\n");
-	// for (int i = 0; i < grid::NUM_JOINTS; i++){
-	// 	printf("Joint %i\n",i);
-	// 	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
-	// 	printf("\n\n");
-	// }
-	// printf("\n\n\n\nd2tau_dqd2\n");
-	// for (int i = 0; i < grid::NUM_JOINTS; i++){
-	// 	printf("Joint %i\n",i);
-	// 	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[grid::NUM_JOINTS*grid::NUM_JOINTS*grid::NUM_JOINTS+i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
-	// 	printf("\n\n");
-	// }
-	// printf("\n\n\n\nd2tau_cross\n");
-	// for (int i = 0; i < grid::NUM_JOINTS; i++){
-	// 	printf("Joint %i\n",i);
-	// 	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[2*grid::NUM_JOINTS*grid::NUM_JOINTS*grid::NUM_JOINTS+i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
-	// 	printf("\n\n");
-	// }
-	// printf("\n\n\n\ndM_dq\n");
-	// for (int i = 0; i < grid::NUM_JOINTS; i++){
-	// 	printf("Joint %i\n",i);
-	// 	printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[3*grid::NUM_JOINTS*grid::NUM_JOINTS*grid::NUM_JOINTS+i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
-	// 	printf("\n\n");
-	// }
+	printf("d2tau_dq2\n");
+	for (int i = 0; i < grid::NUM_JOINTS; i++){
+		printf("Joint %i\n",i);
+		printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
+		printf("\n\n");
+	}
+	printf("\n\n\n\nd2tau_dqd2\n");
+	for (int i = 0; i < grid::NUM_JOINTS; i++){
+		printf("Joint %i\n",i);
+		printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[grid::NUM_JOINTS*grid::NUM_JOINTS*grid::NUM_JOINTS+i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
+		printf("\n\n");
+	}
+	printf("\n\n\n\nd2tau_cross\n");
+	for (int i = 0; i < grid::NUM_JOINTS; i++){
+		printf("Joint %i\n",i);
+		printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[2*grid::NUM_JOINTS*grid::NUM_JOINTS*grid::NUM_JOINTS+i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
+		printf("\n\n");
+	}
+	printf("\n\n\n\ndM_dq\n");
+	for (int i = 0; i < grid::NUM_JOINTS; i++){
+		printf("Joint %i\n",i);
+		printMat<T,grid::NUM_JOINTS,grid::NUM_JOINTS>(&hd_data->h_idsva_so[3*grid::NUM_JOINTS*grid::NUM_JOINTS*grid::NUM_JOINTS+i*grid::NUM_JOINTS*grid::NUM_JOINTS],grid::NUM_JOINTS);
+		printf("\n\n");
+	}
 
 
 	grid::close_grid<T>(streams,d_robotModel,hd_data);

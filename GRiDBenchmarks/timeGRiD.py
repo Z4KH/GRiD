@@ -34,7 +34,7 @@ def main():
     print("-----------------")
     result = subprocess.run( \
         ["nvcc", "-std=c++11", "-o", "timeGRiD.exe", "GRiDBenchmarks/timeGRiD.cu", \
-         "-gencode", "arch=compute_86,code=sm_86", \
+         "-gencode", "arch=compute_89,code=sm_89", \
          "-O3", "-ftz=true", "-prec-div=false", "-prec-sqrt=false"], \
         capture_output=True, text=True \
     )
